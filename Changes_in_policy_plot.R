@@ -230,3 +230,61 @@ ggplot(data_TIMMS, aes(x = Year, y = Rank, color = Country, group = Country)) +
 ggsave("east_asian_timss_rankings.png", width = 12, height = 8, dpi = 300)
 
 
+#------------------ policy changes
+
+library(ggplot2)
+
+events <- data.frame(
+  date = as.Date(c("2009-07-25", "2011-06-30", "2014-09-01", "2020-03-15",
+                   "2013-04-01", "2020-04-07",
+                   "2018-08-22", "2021-07-24",
+                   "2012-05-01", "2016-01-01", "2020-04-08",
+                   "2010-09-01", "2015-10-13", "2019-06-18")),
+  event = c("10 p.m. curfew on hagwons (Seoul)", "Nationwide hagwon curfew", "Free online courses (K-MOOC)", "School closures due to COVID-19",
+            "Curriculum reforms (Yutori education)", "State of emergency declaration",
+            "Double reduction policy announcement", "Ban on for-profit tutoring",
+            "Compulsory education extended to 10 years", "SkillsFuture Credit launch", "Circuit breaker measures",
+            "New Senior Secondary Curriculum", "E-learning implementation", "Extradition bill protests"),
+  country = factor(c("South Korea", "South Korea", "South Korea", "South Korea",
+                     "Japan", "Japan",
+                     "China", "China",
+                     "Singapore", "Singapore", "Singapore",
+                     "Hong Kong", "Hong Kong", "Hong Kong"),
+                   levels = c("South Korea", "Japan", "China", "Singapore", "Hong Kong"))
+)
+
+country_colors <- c("South Korea" = "#4e79a7", "Japan" = "#f28e2b", 
+                    "China" = "#e15759", "Singapore" = "#76b7b2", 
+                    "Hong Kong" = "#59a14f")
+
+pisa_years <- as.Date(paste0(c(2009, 2012, 2015, 2018, 2022), "-01-01"))
+timss_years <- as.Date(paste0(c(2011, 2015, 2019), "-01-01"))
+
+ggplot(events, aes(x=date, y=country, color=country)) +
+  geom_rect(data=data.frame(x=pisa_years), aes(xmin=x, xmax=x+years(1), ymin=-Inf, ymax=Inf), 
+            fill="lightblue", alpha=0.3, inherit.aes=FALSE) +
+  geom_rect(data=data.frame(x=timss_years), aes(xmin=x, xmax=x+years(1), ymin=-Inf, ymax=Inf), 
+            fill="lightgreen", alpha=0.3, inherit.aes=FALSE) +
+  geom_point(size=3) +
+  geom_segment(aes(xend=date, yend=as.numeric(country) - 0.2), linetype="dashed") +
+  geom_text(aes(label=event, y=as.numeric(country) - 0.2), 
+            hjust=0, vjust=1, size=2.5, angle=0, check_overlap = TRUE) +
+  theme_minimal() +
+  theme(legend.position="none",
+        axis.title.y=element_blank(),
+        panel.grid.major.y = element_blank(),
+        plot.title = element_text(hjust = 0, size = 10, face = "bold"),
+        plot.subtitle = element_text(hjust = 0, size = 8),
+        axis.text.y = element_text(size=8, face="bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1, size=6)) +
+  labs(title="Timeline of Policy Changes and Exogenous Events in East Asian Education Systems",
+       subtitle="Key policy changes and external shocks from 2009 to 2023 (PISA years in light blue, TIMSS years in light green)",
+       x="Year") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y", 
+               limits = as.Date(c("2009-01-01", "2023-12-31")), 
+               expand = c(0.01, 0)) +
+  scale_color_manual(values = country_colors) +
+  coord_cartesian(clip = 'off')
+
+
+dplyr::count(production_data,English_points)
